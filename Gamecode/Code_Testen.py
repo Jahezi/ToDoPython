@@ -62,3 +62,8 @@ if current_user:
     character_class = choose_class()
     character = Character(character_name, character_class, 100)
     print(character.display_health())
+
+    # Schaden zufügen über Eingabe
+    damage = int(input("Wie viel Schaden soll zugefügt werden? "))
+    character.take_damage(damage)
+    print(character.display_health())
