@@ -4,6 +4,7 @@ def initialize_database():
     # Verbindung zur SQLite-Datenbank
     conn = sqlite3.connect('Database.db')
     cursor = conn.cursor()
+    
 
     # SQL-Befehl zum Erstellen der Tabellen
     
@@ -40,9 +41,12 @@ def initialize_database():
     );
     ''')
 
+    print("Datenbank wurde initialisert")
+
     # Änderungen speichern und Verbindung schließen
     conn.commit()
     conn.close()
+
 
 # Funktion aufrufen, um die Datenbank zu initialisieren
 initialize_database()

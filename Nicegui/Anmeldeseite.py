@@ -1,6 +1,6 @@
 from nicegui import ui
 ui.label('Willkommen zu Quest-Rpg')
-ui.butten('Anmelden')
-ui.butten('Neuen Character erstellen')
+ui.button('Anmelden')
+ui.button('Neuen Character erstellen')
 
 ui.run()
