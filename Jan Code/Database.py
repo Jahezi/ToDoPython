@@ -12,12 +12,14 @@ def initialize_database():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        class TEXT NOT NULL,
-        level INTEGER NOT NULL,
-        health INTEGER NOT NULL,
-        tasks_completed INTEGER NOT NULL
+        username TEXT UNIQUE NOT NULL,
+        user_password TEXT NOT NULL,
+        user_class TEXT NOT NULL,
+        user_level INTEGER NOT NULL,
+        user_xp INTEGER NOT NULL,
+        user_health INTEGER NOT NULL,
+        tasks_completed INTEGER NOT NULL,
+        user_race  TEXT NOT NULL
     );
     ''')
 
@@ -25,10 +27,10 @@ def initialize_database():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS monsters (
         monster_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
+        monster_name TEXT UNIQUE NOT NULL,
         monster_type TEXT NOT NULL,
-        level INTEGER NOT NULL,
-        health INTEGER NOT NULL
+        monster_level INTEGER NOT NULL,
+        monster_health INTEGER NOT NULL
     );
     ''')
 
@@ -36,8 +38,12 @@ def initialize_database():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS tasks (
         task_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        difficulty TEXT NOT NULL
+        task_name TEXT UNIQUE NOT NULL,
+        task_difficulty TEXT NOT NULL,
+        task_XP INTEGER NOT NULL,
+        task_date INTEGER NOT NULL,
+        task_user TEXT NOT NULL,
+        task_status TEXT NOT NULL
     );
     ''')
 
@@ -46,7 +52,3 @@ def initialize_database():
     # Änderungen speichern und Verbindung schließen
     conn.commit()
     conn.close()
-
-
-# Funktion aufrufen, um die Datenbank zu initialisieren
-initialize_database()
