@@ -1,4 +1,5 @@
 from nicegui import ui
+from tasks import show_tasks
 
 with ui.column().style('max-width: 500px; margin: auto; padding: 10px;'):
     ui.label('Aufgabe erstellen')

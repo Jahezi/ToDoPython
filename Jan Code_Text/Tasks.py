@@ -70,8 +70,6 @@ def end_task(username):
         conn.close()
         level_up(username, taskname)
 
-    
-  
 def level_up(username, taskname):
     # Verbindung zur Datenbank herstellen
     conn = sqlite3.connect('Database.db')
