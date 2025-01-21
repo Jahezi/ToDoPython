@@ -1,10 +1,9 @@
-import sqlite3
-from Database import initialize_database
-from Anmeldung import  not_logged_in_user
-
-initialize_database()
+from nicegui import ui
+from Anmeldung import start_app
 
 def main_menu():
-        not_logged_in_user()
+    start_app()
+
 
 main_menu()
+    
