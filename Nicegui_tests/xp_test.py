@@ -3,19 +3,24 @@ from functions import Users, Database, functions, Tasks
 import sqlite3
 
 Task = Tasks
+User = Users
 
 @ui.page('/')
 def tasks():
+    global user_xp
+    user_xp = 0
+
     def close_task_with_container(card, task_name):
         container.remove(card)  # Remove the specific card
 
         Task.close_task(task_name)  # Schließt den Task und aktualisiert den Status in der Datenbank
-        # XP des Benutzers aktualisieren
         xp_points = 10  # Anzahl der XP-Punkte, die der Benutzer erhalten soll
         update_user_xp(xp_points)
 
-    # Funktion zum Aktualisieren der XP des Benutzers
     def update_user_xp(xp_points):
+        global user_xp
+        user_xp += xp_points
+        xp_bar.set_value(user_xp)
         connection = sqlite3.connect('Database.db')
         cursor = connection.cursor()
         cursor.execute('''
@@ -34,15 +39,13 @@ def tasks():
                 ui.label(task_date)
                 ui.label(task_status)
                 ui.button('Close Task', on_click=lambda: close_task_with_container(card, task_name))
-    
-    # Loop through the tasks and create individual cards for each task
+
     tasks = Task.show_tasks()
     with ui.row():  # Begin a horizontal layout
         for task in tasks:
             task_name, task_difficulty, task_xp, task_date, task_status = task
             add_task(task_name, task_difficulty, task_date, task_status)
-    
-    # Function to create a new task and display it in a new card
+
     def on_task_create_click():
         Task.create_task(task_name.value, task_difficulty.value, date.value)
         add_task(task_name.value, task_difficulty.value, date.value, 'Open')
@@ -62,11 +65,22 @@ def tasks():
                 ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
             ui.button('Task erstellen!', on_click=on_task_create_click)
 
-    ui.button('Close Task', on_click=lambda: container.remove(0) if list(container) else None)
+
+    xp_value = 
+    
+   
+    User.get_user_data(usernae)
+    ui.label(f'Username:'{username})
+
+ui.run()
+
 
     with ui.row():
         ui.button('Add Task', on_click=task_dialog.open)
         ui.button('Clear Tasks', on_click=container.clear)
         ui.button('zurück', on_click=lambda: ui.navigate.to('/user'))
+        slider = ui.slider(min=0, max=1, step=0.01, value=0.5)
+        ui.linear_progress().bind_value_from(slider, 'value')
+        progress_bar = ui.linear_progress().set_value(xp_value)
 
 ui.run()
