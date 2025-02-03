@@ -59,6 +59,21 @@ class Database:
 
 class Users:
     
+    def is_user_registered():
+        # Verbindung zur Datenbank herstellen
+        conn = sqlite3.connect('Database.db')
+        cursor = conn.cursor()
+
+        # Abfrage ausführen
+        cursor.execute('''
+            SELECT COUNT(*)
+            FROM users
+        ''')
+        count = cursor.fetchone()[0]
+
+        # Verbindung zur Datenbank schließen
+        conn.close()
+        return count > 0
 
     def register_user(username, password, user_class, user_race):
         # Verbindung zur Datenbank herstellen
@@ -95,16 +110,20 @@ class Users:
             # Verbindung zur Datenbank schließen
             conn.close()
 
-    def login_user(username, password):
-        conn = sqlite3.connect('Database.db')
+    def check_user_exists(username):
+        # Verbindung zur Datenbank herstellen
+        conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
-        cursor.execute('''
-            SELECT * FROM users WHERE username = ? AND user_password = ?
-        ''', (username, password))
-        user = cursor.fetchone()
+        # SQL-Abfrage ausführen
+        cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
+        result = cursor.fetchone()
+
+        # Verbindung zur Datenbank schließen
         conn.close()
-        return user
+
+        # Überprüfen, ob der Benutzer existiert (COUNT(*) > 0)
+        return result[0] > 0
 
     def show_user_status(username):
     
@@ -129,29 +148,20 @@ class Users:
             print("Benutzer nicht gefunden.")
         conn.close()
 
-    def show_all_users():
-        # Verbindung zur SQLite-Datenbank herstellen
+    def get_user_data():
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
-        # SQL-Abfrage zur Auswahl aller Benutzernamen
+        # Abfrage ausführen
         cursor.execute('''
-            SELECT username FROM users
-        ''')
-
-        # Alle Ergebnisse abrufen
-        users = cursor.fetchall()
-
-        # Benutzer anzeigen
-        if users:
-            print("Alle Benutzer:")
-            for user in users:
-                print(f"- {user[0]}")
-        else:
-            print("Keine Benutzer gefunden.")
+            SELECT username, user_level, user_xp, user_health, user_class, user_race, user_pic
+            FROM users 
+        ''', )
+        return cursor.fetchone()
+        
 
 
-        # Verbindung schließen
+        # Verbindung zur Datenbank schließen
         conn.close()
 
     def delete_user(username):
@@ -171,6 +181,16 @@ class Users:
         conn.commit()
         conn.close()
 
+    def login_user(username, password):
+        conn = sqlite3.connect('Database.db')
+        cursor = conn.cursor()
+
+        cursor.execute('''
+            SELECT * FROM users WHERE username = ? AND user_password = ?
+        ''', (username, password))
+        user = cursor.fetchone()
+        conn.close()
+        return user
 
 
 class Tasks:
@@ -211,127 +231,95 @@ class Tasks:
        conn = sqlite3.connect('Database.db')
        cursor = conn.cursor()   
        cursor.execute('''
-                       SELECT task_name, task_difficulty, task_xp, task_date, task_status FROM tasks
+                       SELECT task_name, task_difficulty, task_xp, task_date, task_status FROM tasks WHERE task_status = 'open'
                    ''', )
        tasks = cursor.fetchall()
        conn.close()    
        return tasks 
+    
+    def show_all_tasks():
+       conn = sqlite3.connect('Database.db')
+       cursor = conn.cursor()   
+       cursor.execute('''
+                       SELECT task_name, task_difficulty, task_xp, task_date, task_status FROM tasks 
+                   ''', )
+       tasks_all = cursor.fetchall()
+       conn.close()    
+       return tasks_all
 
-    def end_task(username):
-        print("Welche Aufgabe willst du beenden?")
-        taskname = input("Name der Aufgabe: ")
+    
+    
+    #def close_task(task_name):
+    #    conn = sqlite3.connect('Database.db')
+    #    cursor = conn.cursor()
+    #   # Close the task
+    #    cursor.execute('''
+    #        UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
+    #    ''', (task_name,))
+    #    ui.notify(f"{task_name} erfolgreich geschlossen!")
+    #    conn.commit()
+    #    # Update user's XP (always add 50 XP)
+    #    cursor.execute('''
+    #        UPDATE users
+    #        SET user_xp = user_xp + 50
+    #    ''')
+    #    conn.commit()
+    #    ui.notify("Task erfolgreich geschlossen! Der User hat jetzt 50 XP dazugewonnen.")
+    #    cursor.execute('''
+    #        UPDATE users
+    #        SET user_level = user_level + 1,
+    #        user_xp = user_xp - 100
+    #         WHERE user_xp >= 100
+    #        ''')
+    #    
+    #    conn.commit()
+    #    ui.update()
+    #    ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzP dazugewonnen.")
+
+
+    def close_task(task_name, task_difficulty):
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
-        # Überprüfen, ob der Task bereits beendet ist
+
+        # XP based on difficulty using if-elif-else
+        if task_difficulty == 'Leicht':
+            xp_gain = 10
+        elif task_difficulty == 'Mittel':
+            xp_gain = 30
+        elif task_difficulty == 'Schwer':
+            xp_gain = 50
+        else:
+            xp_gain = 0  # Default value for unexpected difficulty levels
+
+        # Close the task
         cursor.execute('''
-            SELECT task_status FROM tasks WHERE task_name = ?
-        ''', (taskname,))
-        result = cursor.fetchone()
+            UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
+        ''', (task_name,))
+        ui.notify(f"{task_name} erfolgreich geschlossen!")
+        conn.commit()
 
-        if result is None:
-            print("Dieser Task existiert nicht.")
-        elif result[0] == 'Erfolgreich beendet':
-            print("Dieser Task wurde bereits erfolgreich beendet.")
-        else:
-            # Task als erfolgreich beendet markieren
-            cursor.execute('''
-                UPDATE tasks SET task_status = 'Erfolgreich beendet' WHERE task_name = ? AND task_status = 'open'
-            ''', (taskname,))
-            print("Task erfolgreich beendet!")
-            conn.commit()
-            conn.close()
-            level_up(username, taskname)
-
-    def level_up(username, taskname):
-        # Verbindung zur Datenbank herstellen
-        conn = sqlite3.connect('Database.db')
-        cursor = conn.cursor()
-
-        # Daten aus der Datenbank abrufen
+        # Update user's XP
         cursor.execute('''
-                       SELECT task_XP, user_xp, user_level
-                       FROM users
-                       INNER JOIN tasks ON users.username = tasks.task_user
-                       WHERE task_name = ? AND username = ?
-                    ''', (taskname, username))
-        XP = cursor.fetchone()
+            UPDATE users
+            SET user_xp = user_xp + ?
+        ''', (xp_gain,))
+        conn.commit()
+        ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
 
-        if XP is None:
-            print("Benutzer oder Aufgabe nicht gefunden.")
-            return
+        # Update user's level if applicable
+        cursor.execute('''
+            UPDATE users
+            SET user_level = user_level + 1,
+            user_xp = user_xp - 100
+            WHERE user_xp >= 100
+        ''')
+        conn.commit()
 
-        task_xp = XP[0]
-        user_xp = XP[1]
-        user_level = XP[2]
-
-        # Überprüfen, ob der Benutzer bereits das maximale Level (Level 5) erreicht hat
-        if user_level == 5:
-            print("Glückwunsch! Du hast bereits das maximale Level erreicht!")
-            conn.close()
-            return
-
-        # Neue Gesamt-XP berechnen
-        new_total_xp = min(task_xp + user_xp, 400)
-
-        # Berechnung des neuen Levels basierend auf den Gesamt-XP
-        if new_total_xp >= 400:
-            new_level = 5
-        elif new_total_xp >= 300:
-            new_level = 4
-        elif new_total_xp >= 200:
-            new_level = 3
-        elif new_total_xp >= 100:
-            new_level = 2
-        else:
-            new_level = 1  # Wenn der Wert unter 100 bleibt, bleibt das Level 1
-
-        # Wenn das Level sich geändert hat, aktualisieren und ausgeben
-        if new_level > user_level:
-            cursor.execute('''
-                           UPDATE users SET user_level = ?, user_xp = ? 
-                           WHERE username = ?
-                        ''', (new_level, new_total_xp, username))
-            conn.commit()  # Änderungen speichern
-            print(f"Glückwunsch! Du hast Level {new_level} erreicht!")
-        else:
-            # Gesamt-XP trotzdem aktualisieren, falls kein Level-Up
-            cursor.execute('''
-                           UPDATE users SET user_xp = ? 
-                           WHERE username = ?
-                        ''', (new_total_xp, username))
-            conn.commit()
-
-        conn.close()   
+        
+        ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
     
-    def delete_task(username):
-        print("Hier siehst du alle Tasks:")
-        show_tasks(username)
-        print("Welche Aufgabe willst du löschen?")
-        taskname = input("Name der Aufgabe: ")
-        choice = input("Bist du sicher? Drücke 1 zum bestätigen oder 2 zum abbrechen.")
-        if choice == "1":
-            conn = sqlite3.connect('Database.db')
-            cursor = conn.cursor()
-            cursor.execute('''
-                            DELETE FROM tasks WHERE task_name = ?
-                        ''', (taskname,))
-            print("Task erfolgreich gelöscht!")
-            conn.commit()
-            conn.close()
-            return
-        else:
-            print("Task nicht gelöscht.")
-            return
-    
-    def close_task(taskname):
-            conn = sqlite3.connect('Database.db')
-            cursor = conn.cursor()
-            cursor.execute('''
-                            UPDATE tasks SET STATUS = closed WHERE task_name = ?
-                        ''', (taskname,))
-            ui.notify("Task erfolgreich geschlossen!")
-            conn.commit()
-            conn.close()
+
+           
 
 
 
@@ -346,44 +334,6 @@ class functions:
         else:
             ui.notify('Passwords do not match')
 
-
-    def validate_step_1(reg_username, reg_password, stepper):
-        """ Validate username and password before proceeding. """
-        username_valid = bool(reg_username.value.strip())
-        password_valid = bool(reg_password.value.strip())
-
-        if not username_valid:
-            reg_username.props('error').update()
-            ui.notify("Bitte geben Sie einen Benutzernamen ein!", type='warning')
-        else:
-            reg_username.props(remove='error').update()
-
-        if not password_valid:
-            reg_password.props('error').update()
-            ui.notify("Bitte geben Sie ein Passwort ein!", type='warning')
-        else:
-            reg_password.props(remove='error').update()
-
-        if username_valid and password_valid:
-            stepper.next()
-
-    def validate_step_2(user_class_input, stepper):
-        """ Validate class selection before proceeding. """
-        if user_class_input.value is None:
-            user_class_input.props('error').update()
-            ui.notify("Bitte wählen Sie eine Klasse aus!", type='warning')
-        else:
-            user_class_input.props(remove='error').update()
-            stepper.next()
-
-    def validate_step_3(user_race_input, stepper):
-        """ Validate race selection before proceeding. """
-        if user_race_input.value is None:
-            user_race_input.props('error').update()
-            ui.notify("Bitte wählen Sie eine Rasse aus!", type='warning')
-        else:
-            user_race_input.props(remove='error').update()
-            stepper.next()
 
     def on_register_click(register_dialog):
         """ Final step: Notify and close dialog """
