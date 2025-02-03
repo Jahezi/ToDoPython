@@ -236,81 +236,60 @@ class Tasks:
        tasks = cursor.fetchall()
        conn.close()    
        return tasks 
+    
+    def show_all_tasks():
+       conn = sqlite3.connect('Database.db')
+       cursor = conn.cursor()   
+       cursor.execute('''
+                       SELECT task_name, task_difficulty, task_xp, task_date, task_status FROM tasks 
+                   ''', )
+       tasks_all = cursor.fetchall()
+       conn.close()    
+       return tasks_all
 
-    def level_up(username, taskname):
-        # Verbindung zur Datenbank herstellen
-        conn = sqlite3.connect('Database.db')
-        cursor = conn.cursor()
-
-        # Daten aus der Datenbank abrufen
-        cursor.execute('''
-                       SELECT task_XP, user_xp, user_level
-                       FROM users
-                       INNER JOIN tasks ON users.username = tasks.task_user
-                       WHERE task_name = ? AND username = ?
-                    ''', (taskname, username))
-        XP = cursor.fetchone()
-
-        if XP is None:
-            print("Benutzer oder Aufgabe nicht gefunden.")
-            return
-
-        task_xp = XP[0]
-        user_xp = XP[1]
-        user_level = XP[2]
-
-        # Überprüfen, ob der Benutzer bereits das maximale Level (Level 5) erreicht hat
-        if user_level == 5:
-            ui.notify("Glückwunsch! Du hast bereits das maximale Level erreicht!")
-            conn.close()
-            return
-
-        # Neue Gesamt-XP berechnen
-        new_total_xp = min(task_xp + user_xp, 400)
-
-        # Berechnung des neuen Levels basierend auf den Gesamt-XP
-        if new_total_xp >= 400:
-            new_level = 5
-        elif new_total_xp >= 300:
-            new_level = 4
-        elif new_total_xp >= 200:
-            new_level = 3
-        elif new_total_xp >= 100:
-            new_level = 2
-        else:
-            new_level = 1  # Wenn der Wert unter 100 bleibt, bleibt das Level 1
-
-        # Wenn das Level sich geändert hat, aktualisieren und ausgeben
-        if new_level > user_level:
-            cursor.execute('''
-                           UPDATE users SET user_level = ?, user_xp = ? 
-                           WHERE username = ?
-                        ''', (new_level, new_total_xp, username))
-            conn.commit()  # Änderungen speichern
-            ui.notify(f"Glückwunsch! Du hast Level {new_level} erreicht!")
-        else:
-            # Gesamt-XP trotzdem aktualisieren, falls kein Level-Up
-            cursor.execute('''
-                           UPDATE users SET user_xp = ? 
-                           WHERE username = ?
-                        ''', (new_total_xp, username))
-            conn.commit()
-
-        conn.close()   
+    
     
     #def close_task(task_name):
     #    conn = sqlite3.connect('Database.db')
     #    cursor = conn.cursor()
+    #   # Close the task
     #    cursor.execute('''
-    #                       UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
-    #                   ''', (task_name,))
-    #    ui.notify("Task erfolgreich geschlossenggggggggggggggg!")
+    #        UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
+    #    ''', (task_name,))
+    #    ui.notify(f"{task_name} erfolgreich geschlossen!")
     #    conn.commit()
-    #    conn.close()
-    
-    def close_task(task_name):
+    #    # Update user's XP (always add 50 XP)
+    #    cursor.execute('''
+    #        UPDATE users
+    #        SET user_xp = user_xp + 50
+    #    ''')
+    #    conn.commit()
+    #    ui.notify("Task erfolgreich geschlossen! Der User hat jetzt 50 XP dazugewonnen.")
+    #    cursor.execute('''
+    #        UPDATE users
+    #        SET user_level = user_level + 1,
+    #        user_xp = user_xp - 100
+    #         WHERE user_xp >= 100
+    #        ''')
+    #    
+    #    conn.commit()
+    #    ui.update()
+    #    ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzP dazugewonnen.")
+
+
+    def close_task(task_name, task_difficulty):
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
+
+        # XP based on difficulty using if-elif-else
+        if task_difficulty == 'Leicht':
+            xp_gain = 10
+        elif task_difficulty == 'Mittel':
+            xp_gain = 30
+        elif task_difficulty == 'Schwer':
+            xp_gain = 50
+        else:
+            xp_gain = 0  # Default value for unexpected difficulty levels
 
         # Close the task
         cursor.execute('''
@@ -319,14 +298,25 @@ class Tasks:
         ui.notify(f"{task_name} erfolgreich geschlossen!")
         conn.commit()
 
-        # Update user's XP (always add 50 XP)
+        # Update user's XP
         cursor.execute('''
             UPDATE users
-            SET user_xp = user_xp + 50,
-                user_level = user_level + (user_xp + 50) // 100
-        ''')
+            SET user_xp = user_xp + ?
+        ''', (xp_gain,))
+        conn.commit()
+        ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
 
-        ui.notify("Task erfolgreich geschlossen! Der User hat jetzt 50 XP dazugewonnen.")
+        # Update user's level if applicable
+        cursor.execute('''
+            UPDATE users
+            SET user_level = user_level + 1,
+            user_xp = user_xp - 100
+            WHERE user_xp >= 100
+        ''')
+        conn.commit()
+
+        
+        ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
     
 
            

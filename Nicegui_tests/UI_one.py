@@ -140,10 +140,11 @@ def tasks():
     else:
         ui.label('Benutzerdaten konnten nicht abgerufen werden.')
         
-    def close_task_with_container(card, task_name):
+    def close_task_with_container(card, task_name, task_difficulty):
         container.remove(card)  # Remove the specific card
 
-        Task.close_task(task_name)  # Schließt den Task und aktualisiert den Status in der Datenbank
+        Task.close_task(task_name, task_difficulty)
+         # Schließt den Task und aktualisiert den Status in der Datenbank
         # XP des Benutzers aktualisieren
 
 
@@ -158,7 +159,7 @@ def tasks():
                 ui.label(task_difficulty)
                 ui.label(task_date)
                 ui.label(task_status)
-                ui.button('Close Task', on_click=lambda: close_task_with_container(card, task_name))
+                ui.button('Close Task', on_click=lambda: close_task_with_container(card, task_name, task_difficulty))
     
     # Loop through the tasks and create individual cards for each task
     tasks = Task.show_tasks()
@@ -173,7 +174,7 @@ def tasks():
         add_task(task_name.value, task_difficulty.value, date.value, 'Open')
         task_dialog.close()
 
-    with ui.dialog() as task_dialog:
+    with ui.dialog() as task_dialog:  #Task creation
         with ui.card():
             ui.label('Task erstellen')
             task_name = ui.input('Taskname').classes('w-full')
@@ -189,6 +190,19 @@ def tasks():
 
     with ui.row():
         ui.button('Add Task', on_click=task_dialog.open)
+        ui.button('Tasks anzeigen', on_click = lambda: ui.navigate.to('/tasks'))
+
+@ui.page('/tasks')
+def tasks_show():
+   tasks = Task.show_all_tasks()
+   with ui.row():  # Beginne eine horizontale Ausrichtung
+        for task in tasks:
+            with ui.card():
+                ui.label(f"Task Name: {task[0]}")
+                ui.label(f"Status: {task[1]}")
+                ui.label(f"Difficulty: {task[2]}")
+                
+   ui.button('Zurück', on_click = lambda: ui.navigate.to('/user'))
     
 
 
