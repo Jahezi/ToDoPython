@@ -5,12 +5,10 @@ class Database:
 
 
     def initialize_database():
-        # Verbindung zur SQLite-Datenbank
+       
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
-        # SQL-Befehl zum Erstellen der Tabellen
-        # Hier wird die users Tabelle erstellt
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +23,6 @@ class Database:
         );
         ''')
 
-        # Hier wird die Monsters Tabelle erstellt
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS rewards (
             reward_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +37,7 @@ class Database:
                 ('Ein Tag frei vom Training');
             ''')
 
-        # Hier wird die Tasks Tabelle erstellt
+    
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasks (
             task_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -56,35 +53,35 @@ class Database:
         ui.notify("Datenbank wurde initialisiert")
         print("Datenbank wurde initialisiert")
 
-        # Änderungen speichern und Verbindung schließen
+    
         conn.commit()
         conn.close()
 
 class Users:
     
     def is_user_registered():
-        # Verbindung zur Datenbank herstellen
+        
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
-        # Abfrage ausführen
+       
         cursor.execute('''
             SELECT COUNT(*)
             FROM users
         ''')
         count = cursor.fetchone()[0]
 
-        # Verbindung zur Datenbank schließen
+
         conn.close()
         return count > 0
 
     def register_user(username, password, user_class, user_race):
-        # Verbindung zur Datenbank herstellen
+      
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
         try:
-            # Prüfen, ob der Benutzername bereits existiert
+          
             cursor.execute('''
                 SELECT COUNT(*) FROM users WHERE username = ?
             ''', (username,))
@@ -92,40 +89,38 @@ class Users:
 
             if result[0] > 0:
                 ui.notify("Fehler: Der Benutzername ist bereits vergeben. Bitte wähle einen anderen.")
-                return False  # Benutzername existiert bereits
-
-            # Benutzer in der Datenbank speichern
+                return False 
             cursor.execute('''
                 INSERT INTO users (username, user_password, user_class, user_race, user_level, user_xp, user_health, user_pic)
                 VALUES (?, ?, ?, ?, ?, ?, ?, '')
             ''', (username, password, user_class, user_race, 1, 0, 100))
 
-            # Änderungen speichern
+           
             conn.commit()
             ui.notify(f"Benutzer {username} erfolgreich registriert!")
-            return True  # Benutzer erfolgreich registriert
+            return True  
 
         except sqlite3.Error as e:
             ui.notify(f"Ein Fehler ist aufgetreten: {e}")
-            return False  # Ein anderer Fehler ist aufgetreten
+            return False  
 
         finally:
-            # Verbindung zur Datenbank schließen
+            
             conn.close()
 
     def check_user_exists(username):
-        # Verbindung zur Datenbank herstellen
+       
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
 
-        # SQL-Abfrage ausführen
+  
         cursor.execute("SELECT COUNT(*) FROM users WHERE username = ?", (username,))
         result = cursor.fetchone()
 
-        # Verbindung zur Datenbank schließen
+       
         conn.close()
 
-        # Überprüfen, ob der Benutzer existiert (COUNT(*) > 0)
+       
         return result[0] > 0
 
     def show_user_status(username):
@@ -155,7 +150,7 @@ class Users:
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
-        # Abfrage ausführen
+    
         cursor.execute('''
             SELECT username, user_level, user_xp, user_health, user_class, user_race, user_pic
             FROM users 
@@ -164,7 +159,7 @@ class Users:
         
 
 
-        # Verbindung zur Datenbank schließen
+      
         conn.close()
 
     def delete_user(username):
@@ -254,7 +249,7 @@ class Tasks:
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
 
-        # XP based on difficulty using if-elif-else
+ 
         if task_difficulty == 'Leicht':
             xp_gain = 10
         elif task_difficulty == 'Mittel':
@@ -262,16 +257,15 @@ class Tasks:
         elif task_difficulty == 'Schwer':
             xp_gain = 50
         else:
-            xp_gain = 0  # Default value for unexpected difficulty levels
+            xp_gain = 0 
 
-        # Close the task
         cursor.execute('''
             UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
         ''', (task_name,))
         ui.notify(f"{task_name} erfolgreich geschlossen!")
         conn.commit()
 
-        # Update user's XP
+    
         cursor.execute('''
             UPDATE users
             SET user_xp = user_xp + ?
@@ -279,7 +273,7 @@ class Tasks:
         conn.commit()
         ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
 
-        # Update user's level if applicable
+       
         cursor.execute('''
             UPDATE users
             SET user_level = user_level + 1,
@@ -292,7 +286,7 @@ class Tasks:
         ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
 
 class functions:
-    # auth.py
+   
     
     def checkpw(self, password, password2, close_dialog):
         if password == password2:
