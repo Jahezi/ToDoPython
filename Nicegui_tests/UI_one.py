@@ -128,22 +128,28 @@ def Startpage():
 
 @ui.page('/user')
 def tasks():
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        ui.label(f'Username: {username}')
-        ui.label(f'Level: {user_level}')
-        ui.label(f'XP: {user_xp} / 100')
-        ui.label(f'Health: {user_health}')
-        ui.label(f'Class: {user_class}')
-        ui.label(f'Race: {user_race}')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.')
+    @ui.refreshable
+    def user_data():
+        user_data = User.get_user_data()
+        if user_data:
+            username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
+            with ui.card():
+                ui.label(f'Username: {username}')
+                ui.label(f'Level: {user_level}')
+                ui.label(f'XP: {user_xp} / 100')
+                ui.label(f'Health: {user_health}')
+                ui.label(f'Class: {user_class}')
+                ui.label(f'Race: {user_race}')
+        else:
+            ui.label('Benutzerdaten konnten nicht abgerufen werden.')
         
+    user_data()   
+
     def close_task_with_container(card, task_name, task_difficulty):
         container.remove(card)  # Remove the specific card
 
         Task.close_task(task_name, task_difficulty)
+        user_data.refresh()
          # Schließt den Task und aktualisiert den Status in der Datenbank
         # XP des Benutzers aktualisieren
 
