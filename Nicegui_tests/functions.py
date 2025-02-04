@@ -317,11 +317,6 @@ class Tasks:
 
         
         ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzt {xp_gain} XP dazugewonnen.")
-    
-
-           
-
-
 
 class functions:
     # auth.py
@@ -340,4 +335,7 @@ class functions:
         ui.notify("Registrierung abgeschlossen! ✅", type='positive')
         print("Registration complete!")
         register_dialog.close()
+
+    def show_rewards():
+        
 

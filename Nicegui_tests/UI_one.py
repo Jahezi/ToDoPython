@@ -197,6 +197,7 @@ def tasks():
     with ui.row():
         ui.button('Add Task', on_click=task_dialog.open)
         ui.button('Tasks anzeigen', on_click = lambda: ui.navigate.to('/tasks'))
+        ui.button('Belohnungen', on_click = lambda: ui.navigate.to('/reward'))
 
 @ui.page('/tasks')
 def tasks_show():
@@ -209,6 +210,20 @@ def tasks_show():
                 ui.label(f"Difficulty: {task[2]}")
                 
    ui.button('Zurück', on_click = lambda: ui.navigate.to('/user'))
+
+@ui.page('/reward')
+def rewards():
+    reward = reward.show_rewards()
+    with ui.row():  # Beginne eine horizontale Ausrichtung
+        for rewards in rewards:
+            with ui.card():
+                ui.label(f"Task Name: {reward[0]}")
+                ui.label(f"Status: {reward[1]}")
+                ui.label(f"Difficulty: {reward[2]}")
+
+    ui.button('Zurück', on_click = lambda: ui.navigate.to('/user'))
+
+
     
 
 
