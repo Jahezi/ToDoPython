@@ -122,53 +122,35 @@ def Startpage():
                     with ui.stepper_navigation():
                         ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full')
 
+    ui.label('Hero Quest').style('font-size: 24px; font-weight: bold;')
     ui.button('Open Login Dialog', on_click=logindialog.open)
     ui.button('Open Register Dialog', on_click=register_dialog.open)
+    
 
 
 @ui.page('/user')
 def tasks():
-<<<<<<< HEAD
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        ui.label(f'Username: {username}')
-        ui.label(f'Level: {user_level}')
-        ui.label(f'XP: {user_xp} / 100')
-        ui.label(f'Health: {user_health}')
-        ui.label(f'Class: {user_class}')
-        ui.label(f'Race: {user_race}')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.')
-        
-=======
     @ui.refreshable
     def user_data():
-     user_data = User.get_user_data()
-     if user_data:
-         username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-         ui.label(f'Username: {username}')
-         ui.label(f'Level: {user_level}')
-         ui.label(f'XP: {user_xp} / 100')
-         ui.label(f'Health: {user_health}')
-         ui.label(f'Class: {user_class}')
-         ui.label(f'Race: {user_race}')
-     else:
-         ui.label('Benutzerdaten konnten nicht abgerufen werden.')
+        user_data = User.get_user_data()
+        if user_data:
+            username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
+            ui.label(f'Username: {username}')
+            ui.label(f'Level: {user_level}')
+            ui.label(f'XP: {user_xp} / 100')
+            ui.label(f'Health: {user_health}')
+            ui.label(f'Class: {user_class}')
+            ui.label(f'Race: {user_race}')
+        else:
+            ui.label('Benutzerdaten konnten nicht abgerufen werden.')
         
     user_data()
 
-
->>>>>>> 824280897b114b394b10f4f2ea0eba252f4e3922
     def close_task_with_container(card, task_name, task_difficulty):
         container.remove(card)  # Remove the specific card
 
         Task.close_task(task_name, task_difficulty)
-<<<<<<< HEAD
-=======
         user_data.refresh()
-
->>>>>>> 824280897b114b394b10f4f2ea0eba252f4e3922
          # Schließt den Task und aktualisiert den Status in der Datenbank
         # XP des Benutzers aktualisieren
 
@@ -216,10 +198,6 @@ def tasks():
     with ui.row():
         ui.button('Add Task', on_click=task_dialog.open)
         ui.button('Tasks anzeigen', on_click = lambda: ui.navigate.to('/tasks'))
-<<<<<<< HEAD
-=======
-        ui.button('Refresh')
->>>>>>> 824280897b114b394b10f4f2ea0eba252f4e3922
 
 @ui.page('/tasks')
 def tasks_show():

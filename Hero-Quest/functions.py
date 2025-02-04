@@ -27,15 +27,18 @@ class Database:
 
         # Hier wird die Monsters Tabelle erstellt
         cursor.execute('''
-        CREATE TABLE IF NOT EXISTS monsters (
-            monster_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            monster_name TEXT UNIQUE NOT NULL,
-            monster_type TEXT NOT NULL,
-            monster_level INTEGER NOT NULL,
-            monster_health INTEGER NOT NULL,
-            monster_pic TEXT NOT NULL
+        CREATE TABLE IF NOT EXISTS rewards (
+            reward_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            reward_name TEXT UNIQUE NOT NULL
         );
         ''')
+        cursor.execute('''
+                INSERT OR IGNORE INTO rewards (reward_name)
+                VALUES
+                ('10 Minuten Extra-Pause'),
+                ('Eine Tafel Schokolade'),
+                ('Ein Tag frei vom Training');
+            ''')
 
         # Hier wird die Tasks Tabelle erstellt
         cursor.execute('''
@@ -247,36 +250,6 @@ class Tasks:
        conn.close()    
        return tasks_all
 
-    
-    
-    #def close_task(task_name):
-    #    conn = sqlite3.connect('Database.db')
-    #    cursor = conn.cursor()
-    #   # Close the task
-    #    cursor.execute('''
-    #        UPDATE tasks SET task_status = 'closed' WHERE task_name = ?
-    #    ''', (task_name,))
-    #    ui.notify(f"{task_name} erfolgreich geschlossen!")
-    #    conn.commit()
-    #    # Update user's XP (always add 50 XP)
-    #    cursor.execute('''
-    #        UPDATE users
-    #        SET user_xp = user_xp + 50
-    #    ''')
-    #    conn.commit()
-    #    ui.notify("Task erfolgreich geschlossen! Der User hat jetzt 50 XP dazugewonnen.")
-    #    cursor.execute('''
-    #        UPDATE users
-    #        SET user_level = user_level + 1,
-    #        user_xp = user_xp - 100
-    #         WHERE user_xp >= 100
-    #        ''')
-    #    
-    #    conn.commit()
-    #    ui.update()
-    #    ui.notify(f"Task erfolgreich geschlossen! Der User hat jetzP dazugewonnen.")
-
-
     def close_task(task_name, task_difficulty):
         conn = sqlite3.connect('Database.db')
         cursor = conn.cursor()
@@ -336,6 +309,6 @@ class functions:
         print("Registration complete!")
         register_dialog.close()
 
-    def show_rewards():
-        
+
+              
 
