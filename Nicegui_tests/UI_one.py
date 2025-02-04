@@ -9,6 +9,8 @@ Task = Tasks
 
 Databass.initialize_database()
 
+
+
 @ui.page('/')
 def Startpage():
     #login
@@ -23,10 +25,11 @@ def Startpage():
                     ui.notify(f"Willkommen {user}")
                     logindialog.close()
                     ui.navigate.to('/user')
+
                 else:
                     ui.notify("Fehler: Benutzername oder Passwort falsch")
 
-            ui.button('Login', on_click=handle_login).classes('w-full my-4 text-2xl py-4')  # Größerer Button
+            ui.button('Login', on_click=handle_login).classes('w-full')
     
     def validate_step_1():
         """ Validate username and passwords before proceeding. """
@@ -85,6 +88,7 @@ def Startpage():
             else:
                 ui.notify("Fehler: Registrierung fehlgeschlagen", type='negative')
 
+
     with ui.dialog() as register_dialog:
         with ui.card():
             ui.label('Registration')
@@ -96,276 +100,59 @@ def Startpage():
                     password_input = ui.input(label='Passwort', password=True, password_toggle_button=True).props('required').classes('w-full')
                     confirm_password_input = ui.input(label='Passwort bestätigen', password=True, password_toggle_button=True).props('required').classes('w-full')
                     with ui.stepper_navigation():
-                        ui.button('Next', on_click=validate_step_1).classes('w-full my-4 text-2xl py-4')  # Größerer Button
+                        ui.button('Next', on_click=validate_step_1).classes('w-full')
 
                 # Step 2: Choose Class
                 with ui.step('Choose Your Class'):
                     user_class_input = ui.toggle({'Ritter': 'Ritter', 'Bogenschütze': 'Bogenschütze', 'Magier': 'Magier'}).props('required').classes('w-full')
                     with ui.stepper_navigation():
-                        ui.button('Next', on_click=validate_step_2).classes('w-full my-4 text-2xl py-4')  # Größerer Button
-                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full my-4 text-2xl py-4')  # Größerer Button
+                        ui.button('Next', on_click=validate_step_2).classes('w-full')
+                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full')
 
                 # Step 3: Choose Race
                 with ui.step('Choose Your Race'):
                     user_race_input = ui.toggle({'Mensch': 'Mensch', 'Elf': 'Elf', 'Zwerg': 'Zwerg'}).props('required').classes('w-full')
                     with ui.stepper_navigation():
-                        ui.button('Next', on_click=validate_step_3).classes('w-full my-4 text-2xl py-4')  # Größerer Button
-                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full my-4 text-2xl py-4')  # Größerer Button
+                        ui.button('Next', on_click=validate_step_3).classes('w-full')
+                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full')
 
                 # Step 4: Complete Registration
                 with ui.step('Complete Registration'):
-                    ui.button('Register', on_click=on_register_click).classes('w-full my-4 text-2xl py-4')  # Größerer Button
+                    ui.button('Register', on_click=on_register_click).classes('w-full')
                     with ui.stepper_navigation():
-                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full my-4 text-2xl py-4')  # Größerer Button
+                        ui.button('Back', on_click=stepper.previous).props('flat').classes('w-full')
 
-    with ui.column().classes('items-center justify-center h-screen'):
-        ui.button('Open Login Dialog', on_click=logindialog.open).classes('mx-auto my-4 text-2xl py-4')  # Zentrierter und größerer Button
-        ui.button('Open Register Dialog', on_click=register_dialog.open).classes('mx-auto my-4 text-2xl py-4')  # Zentrierter und größerer Button
+    ui.button('Open Login Dialog', on_click=logindialog.open)
+    ui.button('Open Register Dialog', on_click=register_dialog.open)
+
 
 @ui.page('/user')
 def tasks():
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        with ui.column().classes('items-center justify-center h-screen w-full'):
-            ui.image(user_pic).classes('w-32 h-32 rounded-full mb-4')
-            ui.label(f'Username: {username}').classes('text-2xl font-bold mb-2')
-            ui.label(f'Level: {user_level}').classes('text-xl mb-2')
-            ui.label(f'XP: {user_xp} / 100').classes('text-xl mb-2')
-            ui.label(f'Health: {user_health}').classes('text-xl mb-2')
-            ui.label(f'Class: {user_class}').classes('text-xl mb-2')
-            ui.label(f'Race: {user_race}').classes('text-xl mb-2')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.').classes('text-xl mb-2')
-
-    def close_task_with_container(card, task_name, task_difficulty):
-        container.remove(card)  # Remove the specific card
-        Task.close_task(task_name, task_difficulty)
-
-    container = ui.row().classes('flex-wrap justify-center w-full')
-
-    def add_task(task_name, task_difficulty, task_date, task_status):
-        with container:
-            with ui.card().classes('w-80 m-4 p-4 shadow-lg'):
-                ui.label(task_name).classes('text-lg font-bold mb-2')
-                ui.label(f'Schwierigkeit: {task_difficulty}').classes('text-md mb-2')
-                ui.label(f'Datum: {task_date}').classes('text-md mb-2')
-                ui.label(f'Status: {task_status}').classes('text-md mb-2')
-                ui.button('Aufgabe schließen', on_click=lambda: close_task_with_container(card, task_name, task_difficulty)).classes('bg-red-500 text-white mt-4')
-
-    def on_task_create_click():
-        Task.create_task(task_name.value, task_difficulty.value, date.value)
-        add_task(task_name.value, task_difficulty.value, date.value, 'Open')
-        task_dialog.close()
-
-    with ui.dialog() as task_dialog:
-        with ui.card().classes('w-96 p-4 shadow-lg'):
-            ui.label('Task erstellen').classes('text-2xl font-bold mb-4')
-            task_name = ui.input('Taskname').classes('w-full mb-4')
-            task_difficulty = ui.toggle({'Leicht': 'Leicht', 'Mittel': 'Mittel', 'Schwer': 'Schwer'}).props('required').classes('w-full mb-4')
-            with ui.input('Date') as date:
-                with ui.menu().props('no-parent-event') as menu:
-                    with ui.date().bind_value(date):
-                        with ui.row().classes('justify-end'):
-                            ui.button('Close', on_click=menu.close).props('flat')
-            with date.add_slot('append'):
-                ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
-            ui.button('Task erstellen!', on_click=on_task_create_click).classes('w-full my-4 text-2xl py-4 bg-green-500 text-white')
-
-    with ui.column().classes('items-center justify-center w-full'):
-        ui.button('Neue Aufgabe erstellen', on_click=task_dialog.open).classes('w-full my-4 text-2xl py-4 bg-blue-500 text-white')
-
-    tasks = Task.show_tasks()
-    with ui.row().classes('flex-wrap justify-center w-full'):
-        for task in tasks:
-            task_name, task_difficulty, task_xp, task_date, task_status = task
-            add_task(task_name, task_difficulty, task_date, task_status)
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        with ui.column().classes('items-center justify-center h-screen w-full'):
-            ui.image(user_pic).classes('w-32 h-32 rounded-full mb-4')
-            ui.label(f'Username: {username}').classes('text-2xl font-bold mb-2')
-            ui.label(f'Level: {user_level}').classes('text-xl mb-2')
-            ui.label(f'XP: {user_xp} / 100').classes('text-xl mb-2')
-            ui.label(f'Health: {user_health}').classes('text-xl mb-2')
-            ui.label(f'Class: {user_class}').classes('text-xl mb-2')
-            ui.label(f'Race: {user_race}').classes('text-xl mb-2')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.').classes('text-xl mb-2')
-
-    def close_task_with_container(card, task_name, task_difficulty):
-        container.remove(card)  # Remove the specific card
-        Task.close_task(task_name, task_difficulty)
-
-    container = ui.row().classes('flex-wrap justify-center w-full')
-
-    def add_task(task_name, task_difficulty, task_date, task_status):
-        with container:
-            with ui.card().classes('w-80 m-4 p-4 shadow-lg'):
-                ui.label(task_name).classes('text-lg font-bold mb-2')
-                ui.label(f'Schwierigkeit: {task_difficulty}').classes('text-md mb-2')
-                ui.label(f'Datum: {task_date}').classes('text-md mb-2')
-                ui.label(f'Status: {task_status}').classes('text-md mb-2')
-                ui.button('Aufgabe schließen', on_click=lambda: close_task_with_container(card, task_name, task_difficulty)).classes('bg-red-500 text-white mt-4')
-
-    tasks = Task.show_tasks()
-    with ui.row().classes('flex-wrap justify-center w-full'):
-        for task in tasks:
-            task_name, task_difficulty, task_xp, task_date, task_status = task
-            add_task(task_name, task_difficulty, task_date, task_status)
-
-    def on_task_create_click():
-        Task.create_task(task_name.value, task_difficulty.value, date.value)
-        add_task(task_name.value, task_difficulty.value, date.value, 'Open')
-        task_dialog.close()
-
-    with ui.dialog() as task_dialog:
-        with ui.card().classes('w-96 p-4 shadow-lg'):
-            ui.label('Task erstellen').classes('text-2xl font-bold mb-4')
-            task_name = ui.input('Taskname').classes('w-full mb-4')
-            task_difficulty = ui.toggle({'Leicht': 'Leicht', 'Mittel': 'Mittel', 'Schwer': 'Schwer'}).props('required').classes('w-full mb-4')
-            with ui.input('Date') as date:
-                with ui.menu().props('no-parent-event') as menu:
-                    with ui.date().bind_value(date):
-                        with ui.row().classes('justify-end'):
-                            ui.button('Close', on_click=menu.close).props('flat')
-            with date.add_slot('append'):
-                ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
-            ui.button('Task erstellen!', on_click=on_task_create_click).classes('w-full my-4 text-2xl py-4 bg-green-500 text-white')
-
-    with ui.row().classes('justify-center mt-8 w-full'):
-        ui.button('Neue Aufgabe erstellen', on_click=task_dialog.open).classes('w-full my-4 text-2xl py-4 bg-blue-500 text-white')
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        with ui.column().classes('items-center justify-center h-screen w-full'):
-            ui.image(user_pic).classes('w-32 h-32 rounded-full mb-4')
-            ui.label(f'Username: {username}').classes('text-2xl font-bold mb-2')
-            ui.label(f'Level: {user_level}').classes('text-xl mb-2')
-            ui.label(f'XP: {user_xp} / 100').classes('text-xl mb-2')
-            ui.label(f'Health: {user_health}').classes('text-xl mb-2')
-            ui.label(f'Class: {user_class}').classes('text-xl mb-2')
-            ui.label(f'Race: {user_race}').classes('text-xl mb-2')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.').classes('text-xl mb-2')
-
-    def close_task_with_container(card, task_name, task_difficulty):
-        container.remove(card)  # Remove the specific card
-        Task.close_task(task_name, task_difficulty)
-
-    container = ui.row().classes('flex-wrap justify-center w-full')
-
-    def add_task(task_name, task_difficulty, task_date, task_status):
-        with container:
-            with ui.card().classes('w-80 m-4 p-4 shadow-lg'):
-                ui.label(task_name).classes('text-lg font-bold mb-2')
-                ui.label(f'Schwierigkeit: {task_difficulty}').classes('text-md mb-2')
-                ui.label(f'Datum: {task_date}').classes('text-md mb-2')
-                ui.label(f'Status: {task_status}').classes('text-md mb-2')
-                ui.button('Aufgabe schließen', on_click=lambda: close_task_with_container(card, task_name, task_difficulty)).classes('bg-red-500 text-white mt-4')
-
-    tasks = Task.show_tasks()
-    with ui.row().classes('flex-wrap justify-center w-full'):
-        for task in tasks:
-            task_name, task_difficulty, task_xp, task_date, task_status = task
-            add_task(task_name, task_difficulty, task_date, task_status)
-
-    def on_task_create_click():
-        Task.create_task(task_name.value, task_difficulty.value, date.value)
-        add_task(task_name.value, task_difficulty.value, date.value, 'Open')
-        task_dialog.close()
-
-    with ui.dialog() as task_dialog:
-        with ui.card().classes('w-96 p-4 shadow-lg'):
-            ui.label('Task erstellen').classes('text-2xl font-bold mb-4')
-            task_name = ui.input('Taskname').classes('w-full mb-4')
-            task_difficulty = ui.toggle({'Leicht': 'Leicht', 'Mittel': 'Mittel', 'Schwer': 'Schwer'}).props('required').classes('w-full mb-4')
-            with ui.input('Date') as date:
-                with ui.menu().props('no-parent-event') as menu:
-                    with ui.date().bind_value(date):
-                        with ui.row().classes('justify-end'):
-                            ui.button('Close', on_click=menu.close).props('flat')
-            with date.add_slot('append'):
-                ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
-            ui.button('Task erstellen!', on_click=on_task_create_click).classes('w-full my-4 text-2xl py-4 bg-green-500 text-white')
-
-    with ui.row().classes('justify-center mt-8 w-full'):
-        ui.button('Neue Aufgabe erstellen', on_click=task_dialog.open).classes('w-full my-4 text-2xl py-4 bg-blue-500 text-white')
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        with ui.column().classes('items-center justify-center h-screen'):
-            ui.image(user_pic).classes('w-32 h-32 rounded-full mb-4')
-            ui.label(f'Username: {username}').classes('text-2xl font-bold mb-2')
-            ui.label(f'Level: {user_level}').classes('text-xl mb-2')
-            ui.label(f'XP: {user_xp} / 100').classes('text-xl mb-2')
-            ui.label(f'Health: {user_health}').classes('text-xl mb-2')
-            ui.label(f'Class: {user_class}').classes('text-xl mb-2')
-            ui.label(f'Race: {user_race}').classes('text-xl mb-2')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.').classes('text-xl mb-2')
-
-    def close_task_with_container(card, task_name, task_difficulty):
-        container.remove(card)  # Remove the specific card
-        Task.close_task(task_name, task_difficulty)
-
-    container = ui.row().classes('flex-wrap justify-center')
-
-    def add_task(task_name, task_difficulty, task_date, task_status):
-        with container:
-            with ui.card().classes('w-80 m-4 p-4 shadow-lg'):
-                ui.label(task_name).classes('text-lg font-bold mb-2')
-                ui.label(f'Schwierigkeit: {task_difficulty}').classes('text-md mb-2')
-                ui.label(f'Datum: {task_date}').classes('text-md mb-2')
-                ui.label(f'Status: {task_status}').classes('text-md mb-2')
-                ui.button('Aufgabe schließen', on_click=lambda: close_task_with_container(card, task_name, task_difficulty)).classes('bg-red-500 text-white mt-4')
-
-    tasks = Task.show_tasks()
-    with ui.row().classes('flex-wrap justify-center'):
-        for task in tasks:
-            task_name, task_difficulty, task_xp, task_date, task_status = task
-            add_task(task_name, task_difficulty, task_date, task_status)
-
-    def on_task_create_click():
-        Task.create_task(task_name.value, task_difficulty.value, date.value)
-        add_task(task_name.value, task_difficulty.value, date.value, 'Open')
-        task_dialog.close()
-
-    with ui.dialog() as task_dialog:
-        with ui.card().classes('w-96 p-4 shadow-lg'):
-            ui.label('Task erstellen').classes('text-2xl font-bold mb-4')
-            task_name = ui.input('Taskname').classes('w-full mb-4')
-            task_difficulty = ui.toggle({'Leicht': 'Leicht', 'Mittel': 'Mittel', 'Schwer': 'Schwer'}).props('required').classes('w-full mb-4')
-            with ui.input('Date') as date:
-                with ui.menu().props('no-parent-event') as menu:
-                    with ui.date().bind_value(date):
-                        with ui.row().classes('justify-end'):
-                            ui.button('Close', on_click=menu.close).props('flat')
-            with date.add_slot('append'):
-                ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
-            ui.button('Task erstellen!', on_click=on_task_create_click).classes('w-full my-4 text-2xl py-4 bg-green-500 text-white')
-
-    with ui.row().classes('justify-center mt-8'):
-        ui.button('Neue Aufgabe erstellen', on_click=task_dialog.open).classes('w-full my-4 text-2xl py-4 bg-blue-500 text-white')
-    user_data = User.get_user_data()
-    if user_data:
-        username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
-        ui.label(f'Username: {username}')
-        ui.label(f'Level: {user_level}')
-        ui.label(f'XP: {user_xp} / 100')
-        ui.label(f'Health: {user_health}')
-        ui.label(f'Class: {user_class}')
-        ui.label(f'Race: {user_race}')
-    else:
-        ui.label('Benutzerdaten konnten nicht abgerufen werden.')
+    @ui.refreshable
+    def user_data():
+        user_data = User.get_user_data()
+        if user_data:
+            username, user_level, user_xp, user_health, user_class, user_race, user_pic = user_data
+            with ui.card():
+                ui.label(f'Username: {username}')
+                ui.label(f'Level: {user_level}')
+                ui.label(f'XP: {user_xp} / 100')
+                ui.label(f'Health: {user_health}')
+                ui.label(f'Class: {user_class}')
+                ui.label(f'Race: {user_race}')
+        else:
+            ui.label('Benutzerdaten konnten nicht abgerufen werden.')
         
+    user_data()   
+
     def close_task_with_container(card, task_name, task_difficulty):
         container.remove(card)  # Remove the specific card
 
         Task.close_task(task_name, task_difficulty)
+        user_data.refresh()
          # Schließt den Task und aktualisiert den Status in der Datenbank
         # XP des Benutzers aktualisieren
+
 
     # Funktion zum Aktualisieren der XP des Benutzers
    
